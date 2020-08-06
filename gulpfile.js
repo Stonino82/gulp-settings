@@ -10,8 +10,23 @@ const imagemin = require('gulp-imagemin');
 const newer = require("gulp-newer");
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
+const fileinclude = require('gulp-file-include');
 
-// compile scss into css
+
+// Compile HTMLs files
+function includeHTML(){
+  return gulp
+    .src(['./src/html/index.html'])
+    .pipe(fileinclude({
+      prefix: '@@',
+      basepath: '@file'
+    }))
+    .pipe(gulp.dest('./dist'))
+    // 3. stream changes to ALL browsers (browser-sync)
+    .pipe(browserSync.stream());
+}
+
+// Compile scss into css
 function style() {
     return gulp
         // 1. where are my sccs files
@@ -76,18 +91,20 @@ function images() {
 
 function watch() {
     browserSync.init({
-        proxy: "http://localhost:8888/antoninolattene.com/",
+        proxy: "http://localhost:8888/XXXXXXXXX/dist/",
         notify: true,
         browser: "firefox"
     });
+    gulp.watch('src/html/*.*', includeHTML);
     gulp.watch('src/styles/**', style);
-    gulp.watch('./*.php').on('change', browserSync.reload);
     gulp.watch('src/js/*.*', scripts).on('change', browserSync.reload);
     gulp.watch("src/img/**/*", images);
+    gulp.watch('./dist/').on('change', browserSync.reload);
 }
 
 
 
+exports.html = includeHTML;
 exports.style = style;
 exports.scripts = scripts;
 exports.images = images;
